@@ -1,7 +1,9 @@
 require('dotenv').config();
 
+const parsedPort = Number.parseInt(process.env.PORT || '', 10);
+
 const config = {
-  port: process.env.PORT || 3000,
+  port: Number.isInteger(parsedPort) ? parsedPort : 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
   mongoUri: process.env.MONGODB_URI || '',
   googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || '',

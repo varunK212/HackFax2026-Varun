@@ -7,7 +7,11 @@ const MAX_PORT_ATTEMPTS = 10;
 async function start() {
   await db.connect();
 
-  let port = config.port;
+  const port = Number(config.port);
+  if (!Number.isInteger(port) || port < 0 || port > 65535) {
+    throw new Error(`Invalid PORT value: ${config.port}`);
+  }
+
   const tryListen = (p) =>
     new Promise((resolve, reject) => {
       const server = app.listen(p, () => resolve(server));
@@ -17,7 +21,8 @@ async function start() {
       });
     });
 
-  for (let i = 0; i < MAX_PORT_ATTEMPTS; i++) {
+  const maxAttempts = config.nodeEnv === 'production' ? 1 : MAX_PORT_ATTEMPTS;
+  for (let i = 0; i < maxAttempts; i++) {
     const p = port + i;
     const server = await tryListen(p);
     if (server) {
@@ -29,7 +34,7 @@ async function start() {
       return;
     }
   }
-  throw new Error(`No port available in range ${port}-${port + MAX_PORT_ATTEMPTS - 1}`);
+  throw new Error(`No port available in range ${port}-${port + maxAttempts - 1}`);
 }
 
 start().catch((err) => {
